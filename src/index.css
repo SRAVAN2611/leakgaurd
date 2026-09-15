@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+* { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace !important; }
+
+html { scrollbar-gutter: stable; }
+body { background: #f6f8fb; }
+.dark body { background: #070c12; }
+
+*:focus-visible { outline: 2px solid #0f172a; outline-offset: 2px; border-radius: 6px; }
+.dark *:focus-visible { outline-color: #e2e8f0; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+.dark ::-webkit-scrollbar-thumb { background: #1e2e42; }
+::-webkit-scrollbar-track { background: transparent; }
+
+::selection { background: #0f172a; color: white; }
+.dark ::selection { background: white; color: #0f172a; }

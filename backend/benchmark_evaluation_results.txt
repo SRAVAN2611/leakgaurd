@@ -1,0 +1,26 @@
+
+=================================================================
+                 EXPERIMENTAL EVALUATION METRICS                 
+=================================================================
+  - Total Dataset Size:            30 samples
+  - True Positives (TP):           17
+  - True Negatives (TN):           11
+  - False Positives (FP):          0
+  - False Negatives (FN):          2
+
+-----------------------------------------------------------------
+  CLASSIFICATION PERFORMANCE:
+  - Precision:                     100.00%
+  - Recall (Sensitivity):          89.47%
+  - F1-Score:                      94.44%
+  - False Positive Rate (FPR):     0.00%
+  - False Negative Rate (FNR):     10.53%
+  - Redaction Accuracy:            100.00%
+
+-----------------------------------------------------------------
+  GATEWAY OVERHEAD & LATENCY (ms):
+  - Text Scanning Avg Latency:     19.87 ms
+  - Code Scanning Avg Latency:     17.66 ms
+  - Image OCR Avg Latency:         10.20 ms
+  - Overall Gateway Avg Overhead:  18.38 ms
+=================================================================
