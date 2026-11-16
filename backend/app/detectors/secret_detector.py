@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 SECRET_PATTERNS = [
     {
         "name": "AWS Access Key ID",
-        "pattern": r"\b(AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}\b",
+        "pattern": r"(?i)\b(AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}\b|(?:aws\s*api\s*key|aws\s*access\s*key|aws\s*key|aki[a0o])[:=\s]*([a-zA-Z0-9_]{6,32})",
         "category": "API_KEYS",
         "severity": "Critical",
         "confidence": 0.99,
@@ -32,14 +32,21 @@ SECRET_PATTERNS = [
     },
     {
         "name": "Stripe Secret Key",
-        "pattern": r"\brk_(live|test)_[0-9a-zA-Z]{24,99}\b|\bsk_(live|test|dummy)_[0-9a-zA-Z]{24,99}\b|\bstripe_sec_key_[0-9a-zA-Z_]{16,99}\b",
+        "pattern": r"(?i)\brk_(live|test)_[0-9a-zA-Z]{24,99}\b|\bsk_(live|test|dummy)_[0-9a-zA-Z]{24,99}\b|\bstripe_sec_key_[0-9a-zA-Z_]{16,99}\b|(?:stripe|stfipe|sttipe)\s*(?:sec|secret|stripe)?\s*(?:key)?[^a-zA-Z0-9]*([a-zA-Z0-9_]{6,40})",
         "category": "API_KEYS",
         "severity": "Critical",
         "confidence": 0.99,
         "explanation": "Detected a Stripe Secret API Key.",
         "recommended_action": "BLOCK"
-
-
+    },
+    {
+        "name": "Confidential Infrastructure Logs",
+        "pattern": r"(?i)confi[a-z]*\s+infrastruc[a-z]*\s+logs",
+        "category": "SECRETS",
+        "severity": "Critical",
+        "confidence": 0.98,
+        "explanation": "Detected exposure of confidential infrastructure logs containing sensitive security parameters.",
+        "recommended_action": "BLOCK"
     },
     {
         "name": "OpenAI API Key",

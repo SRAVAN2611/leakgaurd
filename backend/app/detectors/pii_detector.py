@@ -13,7 +13,7 @@ PII_PATTERNS = [
     },
     {
         "name": "Email Address",
-        "pattern": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
+        "pattern": r"\b[A-Za-z0-9._%+-]+(?:\s*@\s*)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b|\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b|(?:admin|adrn)\s+email[^a-zA-Z0-9]*([a-zA-Z0-9_.-]+(?:\s*@\s*|\s*at\s*|-)[a-zA-Z0-9_.-]+)",
         "category": "PII",
         "severity": "Medium",
         "confidence": 0.98,
