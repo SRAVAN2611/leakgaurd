@@ -69,7 +69,12 @@ def process_image_ocr(base64_str: str = None, provided_extracted_text: str = Non
                 reader = get_easyocr_reader()
                 if reader:
                     import numpy as np
-                    img_np = np.array(image.convert('RGB'))
+                    ocr_img = image.convert('RGB')
+                    # Downscale oversized images (e.g. 4MB / 4000px) so EasyOCR runs in seconds
+                    max_dim = 1400
+                    if ocr_img.width > max_dim or ocr_img.height > max_dim:
+                        ocr_img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+                    img_np = np.array(ocr_img)
                     results = reader.readtext(img_np, detail=0)
                     if results and len(results) > 0:
                         raw_joined = " ".join(results).strip()
