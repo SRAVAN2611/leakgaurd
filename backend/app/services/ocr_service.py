@@ -1,12 +1,38 @@
 import base64
 import io
+import re
 import logging
 from PIL import Image
 
 logger = logging.getLogger(__name__)
 
+_easyocr_reader = None
+
+def get_easyocr_reader():
+    global _easyocr_reader
+    if _easyocr_reader is None:
+        try:
+            import easyocr
+            _easyocr_reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+        except Exception as e:
+            logger.warning(f"EasyOCR initialization failed: {e}")
+            _easyocr_reader = False
+    return _easyocr_reader if _easyocr_reader is not False else None
+
+def normalize_ocr_text(text: str) -> str:
+    """Correct common OCR character substitutions for technical tokens."""
+    if not text:
+        return ""
+    # Normalize AKIA keys where 0 was read as O
+    text = re.sub(r'\bAKIA[A-Z0-9]{16}\b', lambda m: m.group(0).replace('O', '0'), text)
+    # Fix database scheme slashes if OCR misread // as II or || or |
+    text = re.sub(r'(postgres|mysql|mongodb):[I|/\\]+', r'\1://', text)
+    # Fix broken email spaces
+    text = re.sub(r'(\b[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\s+com\b)', lambda m: m.group(0).replace(' ', '.'), text)
+    return text
+
 def process_image_ocr(base64_str: str = None, provided_extracted_text: str = None, file_name: str = "image.png") -> str:
-    # 1. If base64 binary payload is provided, process with PIL and Tesseract OCR
+    # 1. If base64 binary payload is provided, process with PIL and OCR
     if base64_str and len(base64_str.strip()) > 0:
         try:
             # Strip header prefix if data URI is passed (e.g., data:image/png;base64,...)
@@ -18,7 +44,7 @@ def process_image_ocr(base64_str: str = None, provided_extracted_text: str = Non
             image = Image.open(io.BytesIO(image_bytes))
             width, height = image.size
 
-            # Attempt pytesseract OCR extraction
+            # Attempt 1: pytesseract OCR extraction
             try:
                 import pytesseract
                 import os
@@ -33,11 +59,25 @@ def process_image_ocr(base64_str: str = None, provided_extracted_text: str = Non
                         break
                 extracted = pytesseract.image_to_string(image)
                 if extracted and len(extracted.strip()) > 0:
-                    # OCR Normalization: clean trailing whitespace and linebreaks
-                    cleaned = " ".join(extracted.split())
+                    cleaned = normalize_ocr_text(" ".join(extracted.split()))
                     return cleaned
             except Exception as ocr_err:
                 logger.warning(f"pytesseract extraction unavailable or failed for {file_name}: {ocr_err}")
+
+            # Attempt 2: EasyOCR in-memory extraction
+            try:
+                reader = get_easyocr_reader()
+                if reader:
+                    import numpy as np
+                    img_np = np.array(image.convert('RGB'))
+                    results = reader.readtext(img_np, detail=0)
+                    if results and len(results) > 0:
+                        raw_joined = " ".join(results).strip()
+                        if len(raw_joined) > 0:
+                            cleaned = normalize_ocr_text(raw_joined)
+                            return cleaned
+            except Exception as eocr_err:
+                logger.warning(f"EasyOCR extraction failed for {file_name}: {eocr_err}")
 
             if provided_extracted_text and len(provided_extracted_text.strip()) > 0:
                 return provided_extracted_text.strip()
